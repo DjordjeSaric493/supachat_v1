@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'message_model.dart';
 
 class Room {
@@ -24,10 +26,13 @@ class Room {
   }
 
   /// Creates a room object from room_participants table ->fromjson klasika
-  Room.fromJSON(Map<String, dynamic> map)
-      : id = map['room_id'],
-        createdAt = DateTime.parse(map['created_at']),
-        lastMessage = null;
+  factory Room.fromJSON(Map<String, dynamic> map) {
+    return Room(
+      id: map['id'],
+      createdAt: DateTime.parse(map['created_at']),
+      lastMessage: null,
+    );
+  }
 
   Room copyWith({
     String? id,
