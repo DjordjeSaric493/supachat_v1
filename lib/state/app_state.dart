@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:rxdart/rxdart.dart';
 import 'package:supachat_v1/constants/constants.dart';
 import 'package:supachat_v1/models/room.dart';
@@ -21,10 +19,8 @@ class AppState {
       return supabase
           .from('room') //
           .stream(primaryKey: ['id']) //
-          .map((list) {
-        debugger;
-        list.map((roomJson) => Room.fromJSON(roomJson)).toList();
-      });
+          .map((list) =>
+              list.map((roomJson) => Room.fromJSON(roomJson)).toList());
     }
   }).shareValue();
 }

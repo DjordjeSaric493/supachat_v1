@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:supachat_v1/constants/constants.dart';
 import 'package:supachat_v1/models/message_model.dart';
@@ -25,12 +26,12 @@ class ChatPage extends StatelessWidget {
       body: StreamBuilder<List<Room>?>(
         stream: AppState.roomsStream,
         builder: (context, snapshot) {
-          if (snapshot.error != null) {
+          if (snapshot.hasError) {
             return Center(child: Text('An error occurred: ${snapshot.error}'));
           }
 
           if (!snapshot.hasData) {
-            return preloader;
+            return const Center(child: Text('Are you signed in?'));
           }
 
           final rooms = snapshot.data!;
@@ -43,11 +44,11 @@ class ChatPage extends StatelessWidget {
                         itemCount: rooms.length,
                         itemBuilder: (context, index) {
                           final room = rooms[index];
-                          return Text(jsonEncode(room.toMap()));
-                          // return ChatBubble(
-                          //   message: message,
-                          //   profile: _profileCache[message.senderId],
-                          // );
+                          return ListTile(
+                            title: Text('Chat: ${room.id}'),
+                            subtitle: Text(
+                                room.lastMessage?.content ?? 'no last message'),
+                          );
                         },
                       ),
               ),
