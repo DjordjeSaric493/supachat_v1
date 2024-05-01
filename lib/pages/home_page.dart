@@ -14,6 +14,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final stream = Supabase.instance.client
+      .from('room')
+      .stream(primaryKey: ['id'])
+      .order('created_at')
+      .map((maps) => maps.map(Room.fromJSON).toList());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,11 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
       //TODO (Rajko): Molim te vidi da li išta od ovoga ima smisla nisam još gotov da plačem ali tu sam negde...
       //kako da ukinem ovo spelovanje kad kucam reči na srpskom?
       body: StreamBuilder<List<Room>?>(
-        stream: Supabase.instance.client
-            .from('room')
-            .stream(primaryKey: ['id'])
-            .order('created_at')
-            .map((maps) => maps.map(Room.fromJSON).toList()),
+        stream: stream,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(
