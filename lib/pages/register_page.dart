@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:supachat_v1/constants/constants.dart';
-import 'package:supachat_v1/pages/chat_page.dart';
+import 'package:supachat_v1/pages/home_page.dart';
 import 'package:supachat_v1/pages/login_page.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -43,7 +43,7 @@ class _RegisterPageState extends State<RegisterPage> {
           email: email, password: password, data: {'username': username});
       if (context.mounted) {
         Navigator.of(context)
-            .pushAndRemoveUntil(ChatPage.route(), (route) => false);
+            .pushAndRemoveUntil(HomeScreen.route(), (route) => false);
       }
 
       //Ako me sjebe error pri auth->pokaži error message

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -11,7 +10,7 @@ import 'package:supachat_v1/widgets/chat_bubble.dart';
 import 'package:supachat_v1/widgets/message_bar.dart';
 
 class ChatPage extends StatelessWidget {
-  const ChatPage({super.key});
+  const ChatPage({super.key, room});
 
   static Route<void> route() {
     return MaterialPageRoute(
@@ -45,14 +44,14 @@ class ChatPage extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final room = rooms[index];
                           return ListTile(
-                            title: Text('Chat: ${room.id}'),
+                            title: Text('Chat: ${room.name}'),
                             subtitle: Text(
                                 room.lastMessage?.content ?? 'no last message'),
                           );
                         },
                       ),
               ),
-              // const MessageBar(),
+              const MessageBar(),
             ],
           );
         },

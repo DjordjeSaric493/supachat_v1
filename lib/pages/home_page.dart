@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supachat_v1/constants/constants.dart';
 import 'package:supachat_v1/models/room.dart';
+import 'package:supachat_v1/pages/chat_page_new.dart';
 import 'chat_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -11,6 +12,12 @@ class HomeScreen extends StatefulWidget {
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
+
+  static Route<Object?> route() {
+    return MaterialPageRoute(
+      builder: (context) => const HomeScreen(),
+    );
+  }
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -61,11 +68,13 @@ class _HomeScreenState extends State<HomeScreen> {
               final room = rooms[index];
               return ListTile(
                 onTap: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) {
-                    return ChatPage();
-                  }));
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) {
+                      return ChatPageNew(room: room);
+                    }),
+                  );
                 },
+                title: Text(room.name),
               );
             },
           );

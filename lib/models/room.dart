@@ -6,6 +6,7 @@ class Room {
   Room({
     required this.id,
     required this.createdAt,
+    required this.name,
     this.lastMessage,
   });
 
@@ -14,6 +15,9 @@ class Room {
 
   /// Date and time when the room was created
   final DateTime createdAt;
+
+  //name of our room
+  final String name;
 
   /// Latest message submitted in the room
   final Message? lastMessage;
@@ -30,6 +34,7 @@ class Room {
     return Room(
       id: map['id'],
       createdAt: DateTime.parse(map['created_at']),
+      name: map['name'] ?? 'Untitled room',
       lastMessage: null,
     );
   }
@@ -42,6 +47,7 @@ class Room {
     return Room(
       id: id ?? this.id,
       createdAt: createdAt ?? this.createdAt,
+      name: name,
       lastMessage: lastMessage ?? this.lastMessage,
     );
   }
