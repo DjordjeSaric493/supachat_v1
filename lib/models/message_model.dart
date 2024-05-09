@@ -4,7 +4,6 @@ class Message {
     required this.senderId,
     required this.content,
     required this.createdAt,
-    required this.isMine,
   });
 
   /// ID of the message
@@ -19,17 +18,11 @@ class Message {
   /// Date and time when the message was created
   final DateTime createdAt;
 
-  /// Whether the message is sent by the user or not.
-  final bool isMine;
-
-  Message.fromMap({
-    required Map<String, dynamic> map,
-    required String myUserId,
-  })  : id = map['id'],
+//samo property koji je u bazi u fromJSON
+  Message.fromJSON(
+    Map<String, dynamic> map,
+  )   : id = map['id'],
         senderId = map['profile_id'],
         content = map['content'],
-        createdAt = DateTime.parse(map['created_at']),
-        isMine = myUserId == map['profile_id'];
-
-  get profileId => null;
+        createdAt = DateTime.parse(map['created_at']);
 }

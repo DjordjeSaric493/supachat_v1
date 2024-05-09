@@ -19,16 +19,17 @@ class ChatBubble extends StatelessWidget {
     return Material(
       elevation: 4,
       borderRadius: BorderRadius.circular(4),
-      color: userId == message.profileId ? Colors.grey[300] : Colors.blue[200],
+      color: userId == message.senderId ? Colors.grey[300] : Colors.blue[200],
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              profileCache[message.profileId]?.username ?? 'loading...',
+              profileCache[message.senderId]?.username ??
+                  'loading, bee patient...',
               style: const TextStyle(
-                color: Colors.black54,
+                color: Colors.black38,
                 fontSize: 14,
               ),
             ),

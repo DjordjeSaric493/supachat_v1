@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supachat_v1/constants/constants.dart';
 import 'package:supachat_v1/models/room.dart';
 import 'package:supachat_v1/pages/chat_page_new.dart';
+import 'package:supachat_v1/pages/login_page.dart';
+import 'package:supachat_v1/pages/register_page.dart';
 import 'chat_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -32,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       //appbar
       appBar: AppBar(
-        title: const Text('Chat Rooms'),
+        title: const Text('Chat Roomz'),
         actions: [
           IconButton(
             onPressed: () {
@@ -80,6 +82,22 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) {
+              return const LoginPage();
+            }),
+          );
+        },
+      ),
     );
+  }
+
+  //ako nije autorizovan
+  void unauth() {
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+        (route) => false);
   }
 }

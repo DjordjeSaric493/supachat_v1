@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:supabase/supabase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:supachat_v1/constants/constants.dart';
 import 'package:supachat_v1/models/message_model.dart';
 import 'package:supachat_v1/models/room.dart';
 import 'package:supachat_v1/models/user_model.dart';
 import 'package:supachat_v1/widgets/chat_bubble.dart';
+import 'package:flutter/src/widgets/async.dart';
 
 class ChatPageNew extends StatefulWidget {
   const ChatPageNew({super.key, required this.room});
@@ -18,27 +18,44 @@ class ChatPageNew extends StatefulWidget {
 }
 
 class _ChatPageNewState extends State<ChatPageNew> {
-  //
-  List<Message>? _messages;
-  final Map<String, Profile> _profileCache = {};
+  final Map<String, Profile> _userProfileCache = {};
 
-  StreamSubscription<List<Message>>? _messagesListener;
+//TODO: bez petljanja sa costraints itd samo jednostavne poruke !!!!!!!
+
   final _textController = TextEditingController();
-
+  late final Stream<List<Message>> _messagesStream;
   @override
   void initState() {
-    final _messagesListener = Supabase.instance.client
-        .from('messages:room_id=eq.${widget.room.id}')
+    _messagesStream = Supabase.instance.client
+        .from('messages')
         .stream(primaryKey: ['id'])
+        .eq(
+            'room_id',
+            widget.room
+                .id) //ubacuješ posle stream-a, poredim kolonu u tabeli i vrednost
         .order('created_at')
-        .map((maps) => maps.map(Room.fromJSON).toList())
-        .listen((messages) {
-          setState(() {
-            _messages = messages.cast<Message>();
-          });
-        });
+        .map((maps) => maps.map(Message.fromJSON).toList());
 
+    // _messagesListener.cancel(); ako ne stavim cancel vrteće u pozadini ->memory leak
     super.initState();
+  }
+
+  Future<void> _fetchProfile(String userId) async {
+    if (_userProfileCache.containsKey(userId)) {
+      return;
+    }
+    final getUser = await Supabase.instance.client
+        .from('profiles')
+        .select()
+        .eq('id', userId)
+        .single();
+
+    final data = getUser.data;
+    if (data != null) {
+      setState(() {
+        _userProfileCache[userId] = Profile.fromMap(data);
+      });
+    }
   }
 
   //šminka
@@ -51,7 +68,7 @@ class _ChatPageNewState extends State<ChatPageNew> {
             child: TextFormField(
               controller: _textController,
               decoration: const InputDecoration(
-                hintText: 'Type ur  message',
+                hintText: 'Type ur message',
                 fillColor: Colors.white,
                 filled: true,
                 border: InputBorder.none,
