@@ -14,8 +14,11 @@ class Profile {
   /// Date and time when the profile was created
   final DateTime createdAt;
 
-  Profile.fromMap(Map<String, dynamic> map)
-      : id = map['id'],
-        username = map['username'],
-        createdAt = DateTime.parse(map['created_at']);
+  factory Profile.fromJSON(Map<String, dynamic> map) {
+    return Profile(
+      id: map['id'],
+      createdAt: DateTime.parse(map['created_at']),
+      username: map['username'] ?? 'Undefied name',
+    );
+  }
 }

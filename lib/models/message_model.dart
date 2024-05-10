@@ -4,6 +4,7 @@ class Message {
     required this.senderId,
     required this.content,
     required this.createdAt,
+    required this.roomId,
   });
 
   /// ID of the message
@@ -18,11 +19,13 @@ class Message {
   /// Date and time when the message was created
   final DateTime createdAt;
 
+  final String roomId;
 //samo property koji je u bazi u fromJSON
   Message.fromJSON(
     Map<String, dynamic> map,
   )   : id = map['id'],
         senderId = map['profile_id'],
         content = map['content'],
-        createdAt = DateTime.parse(map['created_at']);
+        createdAt = DateTime.parse(map['created_at']),
+        roomId = map['room_id'];
 }

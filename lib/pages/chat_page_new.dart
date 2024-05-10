@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:supachat_v1/constants/constants.dart';
 import 'package:supachat_v1/models/message_model.dart';
 import 'package:supachat_v1/models/room.dart';
 import 'package:supachat_v1/models/user_model.dart';
 import 'package:supachat_v1/widgets/chat_bubble.dart';
-import 'package:flutter/src/widgets/async.dart';
+import 'package:supachat_v1/widgets/chat_form.dart';
+import 'package:supachat_v1/widgets/edit_title.dart';
+import 'package:supachat_v1/widgets/invite_room.dart';
 
 class ChatPageNew extends StatefulWidget {
   const ChatPageNew({super.key, required this.room});
@@ -18,84 +19,117 @@ class ChatPageNew extends StatefulWidget {
 }
 
 class _ChatPageNewState extends State<ChatPageNew> {
-  final Map<String, Profile> _userProfileCache = {};
+  List<Message>? _messages;
 
-//TODO: bez petljanja sa costraints itd samo jednostavne poruke !!!!!!!
+  final Map<String, Profile> _profileCache = {};
+
+  StreamSubscription<List<Message>>? _messagesListener;
+
+  late final msgStream = Supabase.instance.client
+      .from('messages')
+      .stream(primaryKey: ['id'])
+      .eq('room_id', widget.room.id)
+      .order('created_at')
+      .map((maps) => maps.map(Room.fromJSON).toList());
 
   final _textController = TextEditingController();
-  late final Stream<List<Message>> _messagesStream;
-  @override
-  void initState() {
-    _messagesStream = Supabase.instance.client
-        .from('messages')
-        .stream(primaryKey: ['id'])
-        .eq(
-            'room_id',
-            widget.room
-                .id) //ubacuješ posle stream-a, poredim kolonu u tabeli i vrednost
-        .order('created_at')
-        .map((maps) => maps.map(Message.fromJSON).toList());
+  late final Stream<List<Message>> _msgStream;
 
-    // _messagesListener.cancel(); ako ne stavim cancel vrteće u pozadini ->memory leak
-    super.initState();
-  }
-
-  Future<void> _fetchProfile(String userId) async {
-    if (_userProfileCache.containsKey(userId)) {
-      return;
-    }
-    final getUser = await Supabase.instance.client
-        .from('profiles')
-        .select()
-        .eq('id', userId)
-        .single();
-
-    final data = getUser.data;
-    if (data != null) {
-      setState(() {
-        _userProfileCache[userId] = Profile.fromMap(data);
-      });
-    }
-  }
+  //FUTURE -nemoj za realtime steamove!! TODO:skontaj šta treba!!!
 
   //šminka
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(children: [
-          Expanded(
-            child: TextFormField(
-              controller: _textController,
-              decoration: const InputDecoration(
-                hintText: 'Type ur message',
-                fillColor: Colors.white,
-                filled: true,
-                border: InputBorder.none,
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        title: TextButton(
+          child: Text(
+            widget.room.name,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
             ),
           ),
-          TextButton(
-            onPressed: () async {
-              final text = _textController.text;
-              if (text.isEmpty) {
-                return;
-              }
-              _textController.clear();
-              final res =
-                  await Supabase.instance.client.from('messages').insert({
-                'room_id': widget.room, //vrednost iz id widgeta
-                'profile_id': Supabase.instance.client.auth.currentUser?.id,
-                //postavi id korisnika u kolonu profile_id .? da osiguram od null
-                'content': text, //text
-              });
-              final error = res.error;
-              if (error != null && mounted) {
-                context.showErrorSnackBar(message: error.message);
-              }
-            },
-            child: Icon(Icons.send),
-          )
-        ]));
+          onPressed: () {
+            showDialog(
+                context: context,
+                builder: (context) {
+                  return EditTitle(
+                    roomId: widget.room.id,
+                  );
+                });
+          },
+        ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return InviteUserDialog(roomId: widget.room.id);
+                    });
+              },
+              icon: Icon(Icons.person_add)),
+        ],
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: _messageList(),
+            ),
+            ChatForm(
+              room: widget.room,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _messageList() {
+    if (_messages == null) {
+      return const Center(
+        child: Text('Loading...'),
+      );
+    }
+    if (_messages!.isEmpty) {
+      return const Center(
+        child: Text('No one has started talking yet...'),
+      );
+    }
+
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 8,
+      ),
+      reverse: true,
+      itemCount: _messages!.length,
+      itemBuilder: ((context, index) {
+        final message = _messages![index];
+        return Align(
+          alignment: userId == message.senderId
+              ? Alignment.centerRight
+              : Alignment.centerLeft,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: ChatBubble(
+              userId: userId,
+              message: message,
+              profileCache: _profileCache,
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  @override
+  void dispose() {
+    _messagesListener?.cancel();
+    super.dispose();
   }
 }

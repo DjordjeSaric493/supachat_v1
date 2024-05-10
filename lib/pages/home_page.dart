@@ -3,8 +3,6 @@ import 'package:supachat_v1/constants/constants.dart';
 import 'package:supachat_v1/models/room.dart';
 import 'package:supachat_v1/pages/chat_page_new.dart';
 import 'package:supachat_v1/pages/login_page.dart';
-import 'package:supachat_v1/pages/register_page.dart';
-import 'chat_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 //------ prikaz lista chat-ova tj chat soba
@@ -49,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
       //pokreni intancu za supabase (.from itd itd)
 
       //TODO (Rajko): Molim te vidi da li išta od ovoga ima smisla nisam još gotov da plačem ali tu sam negde...
-      //kako da ukinem ovo spelovanje kad kucam reči na srpskom?
+
       body: StreamBuilder<List<Room>?>(
         stream: stream,
         builder: (context, snapshot) {

@@ -1,20 +1,64 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supachat_v1/models/room.dart';
 
 class ChatForm extends StatefulWidget {
   const ChatForm({
-    Key? key,
-    required this.roomId,
-  }) : super(key: key);
+    super.key,
+    required this.room,
+  });
 
-  final String roomId;
-
+  //final String roomId;
+  final Room room;
   @override
   State<ChatForm> createState() => _ChatFormState();
 }
 
 class _ChatFormState extends State<ChatForm> {
-  final _textController = TextEditingController();
+  late final msgStream = Supabase.instance.client
+      .from('messages')
+      .stream(primaryKey: ['id'])
+      .eq('room_id', widget.room.id)
+      .order('created_at')
+      .map((maps) => maps.map(Room.fromJSON).toList());
+  final TextEditingController _textController = TextEditingController();
+
+  //kontrola mog stream-a
+  final StreamController<String> _messageStreamController =
+      StreamController<String>();
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _messageStreamController.close();
+    super.dispose();
+  }
+
+  void _sendMessage() async {
+    final text = _textController.text; // Dobijanje teksta iz kontrolera teksta
+    if (text.isEmpty) {
+      // Provera el tekst prazan
+      return;
+    }
+    _textController.clear();
+    final res = await Supabase.instance.client.from('messages').insert({
+      // Slanje poruke ka supabase (INSERT)
+      'room_id': widget.room.id,
+      'profile_id': Supabase.instance.client.auth.getUser(),
+      'content': text,
+    });
+
+    final error = res.error;
+    if (error != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(error
+              .message))); //prikaži snackbar sa tekstom (kao kad pukne auth)
+    } else {
+      _messageStreamController.sink.add(text); // šalji poruke itd itd
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -33,25 +77,7 @@ class _ChatFormState extends State<ChatForm> {
             ),
           ),
           TextButton(
-            onPressed: () async {
-              final text = _textController.text;
-              if (text.isEmpty) {
-                return;
-              }
-              _textController.clear();
-              final res =
-                  await Supabase.instance.client.from('messages').insert({
-                'room_id': widget.roomId,
-                'profile_id': Supabase.instance.client.auth.getUser(),
-                'content': text,
-              });
-
-              final error = res.error;
-              if (error != null && mounted) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(error.message)));
-              }
-            },
+            onPressed: _sendMessage,
             child: const Icon(Icons.send),
           ),
         ],

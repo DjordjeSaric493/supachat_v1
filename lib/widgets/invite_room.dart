@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/src/widgets/async.dart';
@@ -14,8 +16,13 @@ class InviteUserDialog extends StatefulWidget {
   State<InviteUserDialog> createState() => _InviteDialogState();
 }
 
+//TODO: streamovi za poruke, user, sobe umesot ovoga
 class _InviteDialogState extends State<InviteUserDialog> {
   final _textController = TextEditingController();
+
+  final StreamController<String> _inviteStreamController =
+      StreamController<String>();
+
   @override
   Widget build(BuildContext context) {
     return SimpleDialog(
@@ -43,6 +50,7 @@ class _InviteDialogState extends State<InviteUserDialog> {
                   'room_id': widget.roomId,
                   'profile_id': data['id'],
                 });
+                _inviteStreamController.sink.add(username);
                 Navigator.of(context).pop();
               },
               child: const Icon(Icons.add_reaction),

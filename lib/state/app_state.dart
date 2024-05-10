@@ -1,6 +1,9 @@
 import 'package:rxdart/rxdart.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:supachat_v1/constants/constants.dart';
+import 'package:supachat_v1/models/message_model.dart';
 import 'package:supachat_v1/models/room.dart';
+import 'package:supachat_v1/models/user_model.dart';
 
 class AppState {
   static Stream<String?> authUserIdStream = supabase.auth.onAuthStateChange
@@ -21,6 +24,32 @@ class AppState {
           .stream(primaryKey: ['id']) //
           .map((list) =>
               list.map((roomJson) => Room.fromJSON(roomJson)).toList());
+    }
+  }).shareValue();
+/*unut
+  static Stream<List<Message>?> msgStream =
+      authUserIdStream.switchMap((authUserId) {
+    if (authUserId == null) {
+      return Stream.value(null);
+    } else {
+      return supabase
+          .from('room') //
+          .stream(primaryKey: ['id']) //
+          .map((list) =>
+              list.map((roomJson) => Room.fromJSON(roomJson)).toList());
+    }
+  }).shareValue(); */
+  static Stream<List<Profile>?> profilesStream =
+      authUserIdStream.switchMap((authUserId) {
+    if (authUserId == null) {
+      return Stream.value(null);
+    } else {
+      return supabase
+          .from('profiles') //
+          .stream(primaryKey: ['id']) //
+          .map((list) => list
+              .map((profileJson) => Profile.fromJSON(profileJson))
+              .toList());
     }
   }).shareValue();
 }
