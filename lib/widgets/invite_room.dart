@@ -1,3 +1,5 @@
+/*
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -48,7 +50,7 @@ class _InviteDialogState extends State<InviteUserDialog> {
                     .from('room_participants')
                     .insert({
                   'room_id': widget.roomId,
-                  'profile_id': data['id'],
+                  'profile_id': ['id'],
                 });
                 _inviteStreamController.sink.add(username);
                 Navigator.of(context).pop();
@@ -61,3 +63,4 @@ class _InviteDialogState extends State<InviteUserDialog> {
     );
   }
 }
+*/

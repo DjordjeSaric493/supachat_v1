@@ -4,6 +4,7 @@ import 'package:supachat_v1/constants/constants.dart';
 import 'package:supachat_v1/models/message_model.dart';
 import 'package:supachat_v1/models/room.dart';
 import 'package:supachat_v1/models/user_model.dart';
+import 'package:supachat_v1/models/room_participant_model.dart';
 
 class AppState {
   static Stream<String?> authUserIdStream = supabase.auth.onAuthStateChange
@@ -21,8 +22,7 @@ class AppState {
     } else {
       return supabase
           .from('room') //
-          .stream(primaryKey: ['id']) //
-          .map((list) =>
+          .stream(primaryKey: ['id']).map((list) =>
               list.map((roomJson) => Room.fromJSON(roomJson)).toList());
     }
   }).shareValue();
@@ -52,4 +52,18 @@ class AppState {
               .toList());
     }
   }).shareValue();
+
+  static Stream<List<RoomParticipant>?> roomParStream =
+      authUserIdStream.switchMap((authUserId) {
+    if (authUserId == null) {
+      return Stream.value(null);
+    } else {
+      return supabase
+          .from('room_participants') //
+          .stream(primaryKey: ['id']) //
+          .map((list) => list
+              .map((roomParJson) => RoomParticipant.fromJSON(roomParJson))
+              .toList());
+    }
+  }).shareValue() as Stream<List<RoomParticipant>?>;
 }

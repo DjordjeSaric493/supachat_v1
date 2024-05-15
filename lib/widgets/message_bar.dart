@@ -34,9 +34,9 @@ class _MessageBarState extends State<MessageBar> {
                   ),
                 ),
               ),
-              TextButton(
+              IconButton(
                 onPressed: () => _submitMessage(),
-                child: const Text('Send'),
+                icon: const Icon(Icons.send),
               ),
             ],
           ),
