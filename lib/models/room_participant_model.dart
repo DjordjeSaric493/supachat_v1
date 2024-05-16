@@ -1,21 +1,25 @@
 class RoomParticipant {
   RoomParticipant({
-    required this.id,
+    required this.profileId,
     required this.roomId,
     required this.createdAt,
   });
 
-  final String id; //id user
+  final String profileId; //id user
 
   final String roomId; //id room
 
   final DateTime createdAt;
 
   factory RoomParticipant.fromJSON(Map<String, dynamic> map) {
-    return RoomParticipant(
-      id: map['id'],
-      createdAt: DateTime.parse(map['created_at']),
-      roomId: map['roomId'] ?? 'Undefied room id',
-    );
+    try {
+      return RoomParticipant(
+        profileId: map['profile_id'],
+        createdAt: DateTime.parse(map['created_at']),
+        roomId: map['room_id'],
+      );
+    } catch (e, st) {
+      throw e.toString() + '\n' + st.toString();
+    }
   }
 }

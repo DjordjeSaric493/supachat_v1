@@ -85,7 +85,7 @@ class _ChatPageNewState extends State<ChatPageNew> {
         stream: checkInStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Text('Error checking user');
+            return Text(snapshot.error.toString()); //error snap u string
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -94,8 +94,9 @@ class _ChatPageNewState extends State<ChatPageNew> {
           final roomParticipants = snapshot.data ?? [];
           //provderi da li je u sobi  roomParticipants
           //ovo je za bool
-          final isUserInRoom = roomParticipants
-              .any((roomParticipants) => roomParticipants.id == userId);
+          final isUserInRoom = roomParticipants.any((roomParticipant) =>
+              roomParticipant.profileId == supabase.auth.currentUser?.id &&
+              roomParticipant.roomId == widget.room.id);
           /*
           ako treba dalja provera 
           final isUserInRoom2 = roomParticipants
@@ -128,20 +129,25 @@ class _ChatPageNewState extends State<ChatPageNew> {
             ),
             body: SafeArea(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: _messageList(),
                   ),
+                  //135-146 ako je u sobi prikaži chatForm u suprotnom baci elev button
+
                   if (isUserInRoom)
                     ChatForm(
                       room: widget.room,
                     )
                   else
-                    ElevatedButton(
-                      onPressed: () {
-                        //logika za join room
-                      },
-                      child: const Text('JOIN ROOM'),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          addParticipant(userId);
+                        },
+                        child: const Text('JOIN ROOM'),
+                      ),
                     ),
                 ],
               ),
@@ -204,7 +210,7 @@ class _ChatPageNewState extends State<ChatPageNew> {
     super.dispose();
   }
 
-  void deleteParticipant(String userId) async {
+  Future<void> deleteParticipant(String userId) async {
     try {
       final response = await supabase
           .from('room_participants')
@@ -236,5 +242,36 @@ class _ChatPageNewState extends State<ChatPageNew> {
       );
     }
     ;
+  }
+
+  Future<void> addParticipant(String userId) async {
+    try {
+      final response = await supabase
+          .from('room_participants')
+          .insert({'room_id': widget.room.id, 'profile_id': userId});
+
+      if (response.error != null) {
+        throw Exception(response.error!.message);
+      }
+    } catch (error) {
+      print('Error adding participant: $error');
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Error adding user with ID: $userId'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 }

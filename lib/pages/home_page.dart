@@ -37,6 +37,9 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             onPressed: () {
               Supabase.instance.client.auth.signOut();
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                return const LoginPage();
+              }));
             },
             icon: const Icon(Icons.logout_outlined),
             tooltip: 'Logout ',
@@ -80,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      /* floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) {
@@ -88,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
             }),
           );
         },
-      ),
+      ),*/
     );
   }
 
