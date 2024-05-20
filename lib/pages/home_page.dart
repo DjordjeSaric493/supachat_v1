@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:supachat_v1/constants/constants.dart';
 import 'package:supachat_v1/models/room.dart';
+import 'package:supachat_v1/models/room_participant_model.dart';
 import 'package:supachat_v1/pages/chat_page_new.dart';
 import 'package:supachat_v1/pages/login_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'chat_page_new.dart';
 
 //------ prikaz lista chat-ova tj chat soba
 
@@ -21,7 +23,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final stream = Supabase.instance.client
+  //stream da proveri jel u sobi
+  late final checkInStream = supabase
+      .from('room_participants')
+      .stream(primaryKey: ['profile_id', 'room_id']) //može kao složeni ključ!!
+      // primarni ključ od tabele na osnovu toga radi query
+      .eq('profile_id',
+          supabase.auth.currentUser?.id ?? "") //da li može vrati praazan
+      .map((maps) => maps.map(RoomParticipant.fromJSON).toList());
+
+  late final roomStream = Supabase.instance.client
       .from('room')
       .stream(primaryKey: ['id'])
       .order('created_at')
@@ -52,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
       //TODO (Rajko): Molim te vidi da li išta od ovoga ima smisla nisam još gotov da plačem ali tu sam negde...
 
       body: StreamBuilder<List<Room>?>(
-        stream: stream,
+        stream: roomStream,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(
@@ -65,19 +76,42 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text('Create ur room'),
             );
           }
+          //TODO: ovde si igraj sa participoants!!!
           return ListView.builder(
             itemCount: rooms.length, //kolko ima "soba"
             itemBuilder: (context, index) {
               final room = rooms[index];
-              return ListTile(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) {
-                      return ChatPageNew(room: room);
-                    }),
-                  );
-                },
-                title: Text(room.name),
+              return StreamBuilder<List<RoomParticipant>>(
+                stream: checkInStream,
+                builder: ((context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return ListTile(
+                      title: Text(room.name),
+                    );
+                  }
+                  final roomParticipants = snapshot.data ?? [];
+                  final participants = snapshot.data!;
+                  final participantCounter = participants
+                      .where((participant) => participant.roomId == room.id)
+                      .length;
+                  final isUserInRoom = roomParticipants.any((roomParticipant) =>
+                      roomParticipant.profileId ==
+                          supabase.auth.currentUser?.id &&
+                      roomParticipant.roomId == room.id);
+                  return ListTile(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) {
+                            return ChatPageNew(room: room);
+                          }),
+                        );
+                      },
+                      title: Text(
+                          '${room.name}  participants: ($participantCounter) '),
+                      trailing: isUserInRoom
+                          ? Icon(Icons.check, color: Colors.green[700])
+                          : Icon(Icons.close, color: Colors.red));
+                }),
               );
             },
           );

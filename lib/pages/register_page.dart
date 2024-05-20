@@ -20,7 +20,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final bool _isLoading = false;
+  bool _isLoading = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -38,6 +38,9 @@ class _RegisterPageState extends State<RegisterPage> {
     final password = _passwordController.text;
     final username = _usernameController.text;
     final context = this.context; //final context zbog ovih auth context blabla
+    setState(() {
+      _isLoading = true;
+    });
     try {
       await supabase.auth.signUp(
           email: email, password: password, data: {'username': username});

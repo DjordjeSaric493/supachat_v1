@@ -12,6 +12,7 @@ void main() {
         profileId: currentUserId, // pretpostavim da jeste u sobi
         roomId: '262d9d50-97f0-4e33-af4c-1e75f0f68e1c',
         createdAt: DateTime.parse('2024-05-16 07:20:46.107404+00'),
+        username: '',
       ),
     ];
 
@@ -31,6 +32,7 @@ void main() {
         profileId: 'f84e73d2-5602-4ee5-875?.profileId6-5da7f2964bce',
         roomId: 'e340b65d-2386-4dd6-85cc-840717386bef',
         createdAt: DateTime.parse('2024-05-16 07:20:46.107404+00'),
+        username: '',
       ),
     ];
 

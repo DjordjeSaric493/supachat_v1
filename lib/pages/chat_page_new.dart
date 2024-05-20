@@ -10,6 +10,7 @@ import 'package:supachat_v1/state/app_state.dart';
 import 'package:supachat_v1/widgets/chat_bubble.dart';
 import 'package:supachat_v1/widgets/chat_form.dart';
 import 'package:supachat_v1/widgets/edit_title.dart';
+import 'package:supachat_v1/widgets/drawer_chat_page.dart';
 
 class ChatPageNew extends StatefulWidget {
   const ChatPageNew({super.key, required this.room});
@@ -127,6 +128,7 @@ class _ChatPageNewState extends State<ChatPageNew> {
                     onPressed: () {}, icon: const Icon(Icons.person_add)),
               ],
             ),
+            drawer: ChatRoomDrawer(room: widget.room),
             body: SafeArea(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
